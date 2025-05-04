@@ -1,0 +1,7 @@
+Django==5.2
+pandas==2.2.3
+scikit-learn==1.6.1
+plotly==6.0.1
+django-adminlte3==0.1.6
+Pillow==10.2.0
+python-dotenv==1.1.0 

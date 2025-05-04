@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Предсказание: {{ prediction.prediction_type }}{% endblock %}
+
+{% block page_title %}Предсказание: {{ prediction.prediction_type }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Информация о предсказании</h5>
+                <table class="table">
+                    <tr>
+                        <th>Тип предсказания:</th>
+                        <td>{{ prediction.prediction_type }}</td>
+                    </tr>
+                    <tr>
+                        <th>Текущее значение:</th>
+                        <td>{{ prediction.current_value }}</td>
+                    </tr>
+                    <tr>
+                        <th>Предсказанное значение:</th>
+                        <td>{{ prediction.predicted_value }}</td>
+                    </tr>
+                    <tr>
+                        <th>Дата предсказания:</th>
+                        <td>{{ prediction.prediction_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Целевая дата:</th>
+                        <td>{{ prediction.target_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Уверенность:</th>
+                        <td>{{ prediction.confidence }}%</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>Заметки</h5>
+                <p>{{ prediction.notes|default:"Нет заметок" }}</p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{% url 'predictions:delete' prediction.pk %}" class="btn btn-danger">Удалить</a>
+            <a href="{% url 'predictions:list' %}" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

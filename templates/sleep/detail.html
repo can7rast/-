@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Запись сна от {{ sleep.date }}{% endblock %}
+
+{% block page_title %}Запись сна от {{ sleep.date }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Информация о сне</h5>
+                <table class="table">
+                    <tr>
+                        <th>Дата:</th>
+                        <td>{{ sleep.date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Время отхода ко сну:</th>
+                        <td>{{ sleep.start_time }}</td>
+                    </tr>
+                    <tr>
+                        <th>Время пробуждения:</th>
+                        <td>{{ sleep.end_time }}</td>
+                    </tr>
+                    <tr>
+                        <th>Длительность:</th>
+                        <td>{{ sleep.duration }} часов</td>
+                    </tr>
+                    <tr>
+                        <th>Качество сна:</th>
+                        <td>{{ sleep.quality }}</td>
+                    </tr>
+                    <tr>
+                        <th>Количество пробуждений:</th>
+                        <td>{{ sleep.interruptions }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>Заметки</h5>
+                <p>{{ sleep.notes|default:"Нет заметок" }}</p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{% url 'sleep:update' sleep.pk %}" class="btn btn-primary">Редактировать</a>
+            <a href="{% url 'sleep:delete' sleep.pk %}" class="btn btn-danger">Удалить</a>
+            <a href="{% url 'sleep:list' %}" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Запись прогресса от {{ progress.date }}{% endblock %}
+
+{% block page_title %}Запись прогресса от {{ progress.date }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Измерения</h5>
+                <table class="table">
+                    <tr>
+                        <th>Дата:</th>
+                        <td>{{ progress.date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Вес:</th>
+                        <td>{{ progress.weight }} кг</td>
+                    </tr>
+                    <tr>
+                        <th>Грудь:</th>
+                        <td>{{ progress.chest }} см</td>
+                    </tr>
+                    <tr>
+                        <th>Талия:</th>
+                        <td>{{ progress.waist }} см</td>
+                    </tr>
+                    <tr>
+                        <th>Бедра:</th>
+                        <td>{{ progress.hips }} см</td>
+                    </tr>
+                    <tr>
+                        <th>Бицепс:</th>
+                        <td>{{ progress.biceps }} см</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>Заметки</h5>
+                <p>{{ progress.notes|default:"Нет заметок" }}</p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{% url 'progress:update' progress.pk %}" class="btn btn-primary">Редактировать</a>
+            <a href="{% url 'progress:delete' progress.pk %}" class="btn btn-danger">Удалить</a>
+            <a href="{% url 'progress:list' %}" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

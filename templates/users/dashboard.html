@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Панель управления{% endblock %}
+
+{% block page_title %}Панель управления{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Тренировки</h3>
+            </div>
+            <div class="card-body">
+                <p>Последняя тренировка: {{ last_workout.date|default:"Нет данных" }}</p>
+                <a href="{% url 'workouts:list' %}" class="btn btn-primary">Управление тренировками</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Питание</h3>
+            </div>
+            <div class="card-body">
+                <p>Последний прием пищи: {{ last_meal.date|default:"Нет данных" }}</p>
+                <a href="{% url 'nutrition:list' %}" class="btn btn-primary">Управление питанием</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Прогресс</h3>
+            </div>
+            <div class="card-body">
+                <p>Последнее измерение: {{ last_progress.date|default:"Нет данных" }}</p>
+                <a href="{% url 'progress:list' %}" class="btn btn-primary">Управление прогрессом</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Цели</h3>
+            </div>
+            <div class="card-body">
+                <p>Активных целей: {{ active_goals_count }}</p>
+                <a href="{% url 'goals:list' %}" class="btn btn-primary">Управление целями</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Предсказания</h3>
+            </div>
+            <div class="card-body">
+                <p>Последнее предсказание: {{ last_prediction.prediction_date|default:"Нет данных" }}</p>
+                <a href="{% url 'predictions:list' %}" class="btn btn-primary">Управление предсказаниями</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Сон</h3>
+            </div>
+            <div class="card-body">
+                <p>Последняя запись сна: {{ last_sleep.date|default:"Нет данных" }}</p>
+                <a href="{% url 'sleep:list' %}" class="btn btn-primary">Управление сном</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

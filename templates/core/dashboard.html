@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Дашборд - FitTrack{% endblock %}
+
+{% block page_title %}Дашборд{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'plugins/chart.js/Chart.min.css' %}">
+<style>
+.progress-xs {
+    height: 0.5rem;
+}
+.progress-bar {
+    transition: width 0.6s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Статистика тренировок -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ workout_stats.total_workouts }}</h3>
+                <p>Тренировок за неделю</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-dumbbell"></i>
+            </div>
+            <a href="{% url 'workouts:list' %}" class="small-box-footer">
+                Подробнее <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Статистика питания -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ nutrition_stats.avg_calories|floatformat:0 }}</h3>
+                <p>Средние калории в день</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <a href="{% url 'nutrition:list' %}" class="small-box-footer">
+                Подробнее <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Прогресс -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ progress_stats.weight_change|floatformat:1 }} кг</h3>
+                <p>Изменение веса за месяц</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-weight"></i>
+            </div>
+            <a href="{% url 'progress:list' %}" class="small-box-footer">
+                Подробнее <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Сон -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>{{ sleep_stats.avg_duration|floatformat:1 }} ч</h3>
+                <p>Средняя продолжительность сна</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-bed"></i>
+            </div>
+            <a href="{% url 'sleep:list' %}" class="small-box-footer">
+                Подробнее <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- График веса -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Динамика веса</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="weightChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- График тренировок -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Активность тренировок</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="workoutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Последние тренировки -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Последние тренировки</h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Тип</th>
+                                <th>Продолжительность</th>
+                                <th>Интенсивность</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for workout in recent_workouts %}
+                            <tr>
+                                <td>{{ workout.date|date:"d.m.Y" }}</td>
+                                <td>{{ workout.workout_type.name }}</td>
+                                <td>{{ workout.duration }}</td>
+                                <td>{{ workout.get_intensity_display }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">Нет данных о тренировках</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Активные цели -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Активные цели</h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Цель</th>
+                                <th>Текущее значение</th>
+                                <th>Целевое значение</th>
+                                <th>Прогресс</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for goal in active_goals %}
+                            <tr>
+                                <td>{{ goal.get_goal_type_display }}</td>
+                                <td>{{ goal.current_value }}</td>
+                                <td>{{ goal.target_value }}</td>
+                                <td>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-primary" style="width: {{ goal.progress_percentage }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">Нет активных целей</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // График веса
+    var weightCtx = document.getElementById('weightChart').getContext('2d');
+    var weightChart = new Chart(weightCtx, {
+        type: 'line',
+        data: {
+            labels: JSON.parse('{{ weight_data.labels|safe }}'),
+            datasets: [{
+                label: 'Вес (кг)',
+                data: JSON.parse('{{ weight_data.values|safe }}'),
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // График тренировок
+    var workoutCtx = document.getElementById('workoutChart').getContext('2d');
+    var workoutChart = new Chart(workoutCtx, {
+        type: 'bar',
+        data: {
+            labels: JSON.parse('{{ workout_data.labels|safe }}'),
+            datasets: [{
+                label: 'Количество тренировок',
+                data: JSON.parse('{{ workout_data.values|safe }}'),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+});
+</script>
+{% endblock %} 
