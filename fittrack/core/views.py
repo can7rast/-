@@ -6,7 +6,6 @@ from fittrack.workouts.models import Workout
 from fittrack.nutrition.models import Meal
 from fittrack.progress.models import Progress
 from fittrack.sleep.models import Sleep
-from fittrack.goals.models import Goal
 from django.db import models
 
 @login_required
@@ -96,12 +95,6 @@ def dashboard(request):
         user=request.user
     ).select_related('workout_type').order_by('-date')[:5]
     
-    # Активные цели
-    active_goals = Goal.objects.filter(
-        user=request.user,
-        status='active'
-    )
-    
     context = {
         'workout_stats': workout_stats,
         'nutrition_stats': nutrition_stats,
@@ -109,8 +102,7 @@ def dashboard(request):
         'sleep_stats': sleep_stats,
         'weight_data': weight_data,
         'workout_data': workout_data,
-        'recent_workouts': recent_workouts,
-        'active_goals': active_goals
+        'recent_workouts': recent_workouts
     }
     
     return render(request, 'core/dashboard.html', context) 

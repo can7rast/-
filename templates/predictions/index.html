@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load prediction_filters %}
+
+{% block title %}Прогнозы и аналитика - FitTrack{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if error %}
+    <div class="alert alert-warning">
+        {{ error }}
+    </div>
+    {% else %}
+        <!-- Основные показатели -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ current_weight|floatformat:1 }} кг</h3>
+                        <p>Текущий вес</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-weight"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ avg_calories|floatformat:0 }}</h3>
+                        <p>Средние калории/день</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ workouts_per_week }}</h3>
+                        <p>Тренировок в неделю</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{ predicted_weight|floatformat:1 }} кг</h3>
+                        <p>Прогноз через 30 дней</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- График прогресса и прогноза -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-line mr-1"></i>
+                            Динамика веса и прогноз
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {{ weight_plot|safe }}
+                        {% if days_to_goal %}
+                        <div class="progress mt-3">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ progress_percentage }}%"
+                                 aria-valuenow="{{ progress_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ progress_percentage|floatformat:1 }}% к цели
+                            </div>
+                        </div>
+                        <small class="text-muted">Осталось {{ days_to_goal }} дней до целевой даты</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-lightbulb mr-1"></i>
+                            Рекомендации
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if recommendations %}
+                            <ul class="list-unstyled">
+                            {% for recommendation in recommendations %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success mr-2"></i>
+                                    {{ recommendation }}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">Нет активных рекомендаций</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Прогнозы на неделю -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-calendar-week mr-1"></i>
+                            Прогноз на ближайшую неделю
+                        </h3>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Прогнозируемый вес</th>
+                                    <th>Изменение</th>
+                                    <th>Уверенность</th>
+                                    <th>Рекомендации</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prediction in predictions %}
+                                <tr>
+                                    <td>{{ prediction.date|date:"d.m.Y" }}</td>
+                                    <td>{{ prediction.predicted_weight|floatformat:1 }} кг</td>
+                                    <td>
+                                        {% if prediction.weight_change > 0 %}
+                                            <span class="text-success">
+                                                <i class="fas fa-arrow-up"></i>
+                                                {{ prediction.weight_change|floatformat:2 }} кг
+                                            </span>
+                                        {% elif prediction.weight_change < 0 %}
+                                            <span class="text-danger">
+                                                <i class="fas fa-arrow-down"></i>
+                                                {{ prediction.weight_change|abs_value|floatformat:2 }} кг
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">
+                                                <i class="fas fa-equals"></i>
+                                                0.00 кг
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ prediction.confidence }}%"
+                                                 aria-valuenow="{{ prediction.confidence }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ prediction.confidence|floatformat:0 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ prediction.recommendation }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Влияние питания -->
+        {% if nutrition_impact %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-utensils mr-1"></i>
+                            Влияние питания на прогресс
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-success">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Высококалорийные дни (>3000 ккал)</span>
+                                        <span class="info-box-number">{{ nutrition_impact.high_calorie_impact|floatformat:2 }} кг/день</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" style="width: {{ nutrition_impact.high_calorie_confidence }}%"></div>
+                                        </div>
+                                        <span class="progress-description">
+                                            Уверенность: {{ nutrition_impact.high_calorie_confidence }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-info">
+                                        <i class="fas fa-equals"></i>
+                                    </span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Средняя калорийность (2000-3000 ккал)</span>
+                                        <span class="info-box-number">{{ nutrition_impact.medium_calorie_impact|floatformat:2 }} кг/день</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" style="width: {{ nutrition_impact.medium_calorie_confidence }}%"></div>
+                                        </div>
+                                        <span class="progress-description">
+                                            Уверенность: {{ nutrition_impact.medium_calorie_confidence }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-warning">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Низкокалорийные дни (<2000 ккал)</span>
+                                        <span class="info-box-number">{{ nutrition_impact.low_calorie_impact|floatformat:2 }} кг/день</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" style="width: {{ nutrition_impact.low_calorie_confidence }}%"></div>
+                                        </div>
+                                        <span class="progress-description">
+                                            Уверенность: {{ nutrition_impact.low_calorie_confidence }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновление данных каждые 5 минут
+    setInterval(function() {
+        fetch('{% url "predictions:api_data" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+                // Обновление графиков и данных
+                location.reload();
+            });
+    }, 300000);
+});
+</script>
+{% endblock %} 

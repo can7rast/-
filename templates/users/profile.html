@@ -1,80 +1,172 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Профиль{% endblock %}
+{% block title %}Мой профиль{% endblock %}
 
-{% block page_title %}Профиль{% endblock %}
+{% block page_title %}
+    Мой профиль
+    <a href="{% url 'users:edit_profile' %}" class="btn btn-primary float-right">
+        <i class="fas fa-edit"></i> Редактировать профиль
+    </a>
+{% endblock %}
 
 {% block content %}
 <div class="row">
+    <!-- Основная информация -->
     <div class="col-md-4">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body text-center">
-                <img class="rounded-circle account-img" src="{{ user.profile.image.url }}" style="width: 150px; height: 150px;">
-                <h3 class="mt-3">{{ user.username }}</h3>
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Аватар" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                {% endif %}
+                
+                <h4 class="card-title">{{ user.get_full_name }}</h4>
                 <p class="text-muted">{{ user.email }}</p>
-                <p class="text-muted">
-                    {% if user.profile.role == 'coach' %}
-                    <span class="badge badge-primary">Тренер</span>
-                    {% else %}
-                    <span class="badge badge-success">Спортсмен</span>
+                
+                <hr>
+                
+                <div class="text-left">
+                    <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
+                    <p><strong>Последний вход:</strong> {{ user.last_login|date:"d.m.Y H:i" }}</p>
+                    {% if user.profile.birth_date %}
+                        <p><strong>Дата рождения:</strong> {{ user.profile.birth_date|date:"d.m.Y" }}</p>
                     {% endif %}
-                </p>
+                    {% if user.profile.gender %}
+                        <p><strong>Пол:</strong> {{ user.profile.get_gender_display }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Физические параметры -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Физические параметры</h5>
+                <div class="row">
+                    {% if user.profile.height %}
+                        <div class="col-6">
+                            <p><strong>Рост:</strong><br>{{ user.profile.height }} см</p>
+                        </div>
+                    {% endif %}
+                    {% if user.profile.weight %}
+                        <div class="col-6">
+                            <p><strong>Вес:</strong><br>{{ user.profile.weight }} кг</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if user.profile.height and user.profile.weight %}
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>ИМТ:</strong><br>{{ user.profile.get_bmi }} ({{ user.profile.get_bmi_status }})</p>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Статистика -->
     <div class="col-md-8">
-        <div class="card">
+        <!-- Общая статистика -->
+        <div class="card mb-4">
             <div class="card-body">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="{{ user_form.username.id_for_label }}">Имя пользователя</label>
-                        {{ user_form.username }}
-                        {% if user_form.username.errors %}
-                        <div class="alert alert-danger">
-                            {{ user_form.username.errors }}
-                        </div>
-                        {% endif %}
+                <h5 class="card-title">Общая статистика</h5>
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h3>{{ total_workouts }}</h3>
+                        <p class="text-muted">Всего тренировок</p>
                     </div>
-                    <div class="form-group">
-                        <label for="{{ user_form.email.id_for_label }}">Email</label>
-                        {{ user_form.email }}
-                        {% if user_form.email.errors %}
-                        <div class="alert alert-danger">
-                            {{ user_form.email.errors }}
-                        </div>
-                        {% endif %}
+                    <div class="col-md-3 text-center">
+                        <h3>{{ active_goals }}</h3>
+                        <p class="text-muted">Активных целей</p>
                     </div>
-                    <div class="form-group">
-                        <label for="{{ profile_form.image.id_for_label }}">Изображение профиля</label>
-                        {{ profile_form.image }}
-                        {% if profile_form.image.errors %}
-                        <div class="alert alert-danger">
-                            {{ profile_form.image.errors }}
-                        </div>
-                        {% endif %}
+                    <div class="col-md-3 text-center">
+                        <h3>{{ total_calories_burned }}</h3>
+                        <p class="text-muted">Калорий сожжено</p>
                     </div>
-                    <div class="form-group">
-                        <label for="{{ profile_form.bio.id_for_label }}">О себе</label>
-                        {{ profile_form.bio }}
-                        {% if profile_form.bio.errors %}
-                        <div class="alert alert-danger">
-                            {{ profile_form.bio.errors }}
-                        </div>
-                        {% endif %}
+                    <div class="col-md-3 text-center">
+                        <h3>{{ workout_streak }}</h3>
+                        <p class="text-muted">Дней подряд</p>
                     </div>
-                    <div class="form-group">
-                        <label for="{{ profile_form.role.id_for_label }}">Роль</label>
-                        {{ profile_form.role }}
-                        {% if profile_form.role.errors %}
-                        <div class="alert alert-danger">
-                            {{ profile_form.role.errors }}
-                        </div>
-                        {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние тренировки -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    Последние тренировки
+                    <a href="{% url 'workouts:list' %}" class="btn btn-sm btn-primary float-right">
+                        Все тренировки
+                    </a>
+                </h5>
+                {% if recent_workouts %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Тип</th>
+                                    <th>Длительность</th>
+                                    <th>Калории</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for workout in recent_workouts %}
+                                    <tr>
+                                        <td>{{ workout.date|date:"d.m.Y" }}</td>
+                                        <td>{{ workout.get_workout_type_display }}</td>
+                                        <td>{{ workout.duration }} мин</td>
+                                        <td>{{ workout.calories_burned }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <button type="submit" class="btn btn-primary">Обновить профиль</button>
-                </form>
+                {% else %}
+                    <p class="text-muted">Нет недавних тренировок</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Активные цели -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    Активные цели
+                    <a href="{% url 'goals:list' %}" class="btn btn-sm btn-primary float-right">
+                        Все цели
+                    </a>
+                </h5>
+                {% if active_goals_list %}
+                    <div class="row">
+                        {% for goal in active_goals_list %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ goal.title }}</h6>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ goal.get_progress }}%"
+                                                 aria-valuenow="{{ goal.get_progress }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ goal.get_progress }}%
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">
+                                            Осталось дней: {{ goal.days_remaining }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Нет активных целей</p>
+                {% endif %}
             </div>
         </div>
     </div>

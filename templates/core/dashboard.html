@@ -112,7 +112,7 @@
 
 <div class="row">
     <!-- Последние тренировки -->
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Последние тренировки</h3>
@@ -139,47 +139,6 @@
                             {% empty %}
                             <tr>
                                 <td colspan="4" class="text-center">Нет данных о тренировках</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Активные цели -->
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Активные цели</h3>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Цель</th>
-                                <th>Текущее значение</th>
-                                <th>Целевое значение</th>
-                                <th>Прогресс</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for goal in active_goals %}
-                            <tr>
-                                <td>{{ goal.get_goal_type_display }}</td>
-                                <td>{{ goal.current_value }}</td>
-                                <td>{{ goal.target_value }}</td>
-                                <td>
-                                    <div class="progress progress-xs">
-                                        <div class="progress-bar bg-primary" style="width: {{ goal.progress_percentage }}%"></div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center">Нет активных целей</td>
                             </tr>
                             {% endfor %}
                         </tbody>

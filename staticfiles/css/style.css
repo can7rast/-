@@ -1,0 +1,61 @@
+/* Общие стили */
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Навигация */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Карточки */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-title {
+    margin-bottom: 0;
+}
+
+/* Таблицы */
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Формы */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Кнопки */
+.btn {
+    margin-right: 0.5rem;
+}
+
+/* Сообщения */
+.alert {
+    margin-bottom: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+} 

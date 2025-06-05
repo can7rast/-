@@ -1,32 +1,186 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block page_title %}{{ title }}{% endblock %}
+{% block extra_css %}
+{{ form.media.css }}
+{% endblock %}
+
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center">
+    <span>{{ title }}</span>
+    <a href="{% url 'nutrition:list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> К списку
+    </a>
+</div>
+{% endblock %}
 
 {% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
 <div class="card">
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
-            {% for field in form %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.date.id_for_label }}">Дата</label>
+                                <div class="input-group" id="datepicker" data-target-input="nearest">
+                                    {{ form.date }}
+                                    <div class="input-group-append" data-target="#datepicker" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                                    </div>
+                                </div>
+                                {% if form.date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.date.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.time.id_for_label }}">Время</label>
+                                <div class="input-group" id="timepicker" data-target-input="nearest">
+                                    {{ form.time }}
+                                    <div class="input-group-append" data-target="#timepicker" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="far fa-clock"></i></div>
+                                    </div>
+                                </div>
+                                {% if form.time.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.time.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="{{ form.meal_type.id_for_label }}">Тип приема пищи</label>
+                        {{ form.meal_type|add_class:'form-control' }}
+                        {% if form.meal_type.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.meal_type.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.calories.id_for_label }}">Калории</label>
+                                <div class="input-group">
+                                    {{ form.calories|add_class:'form-control' }}
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">ккал</span>
+                                    </div>
+                                </div>
+                                {% if form.calories.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.calories.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.protein.id_for_label }}">Белки</label>
+                                <div class="input-group">
+                                    {{ form.protein|add_class:'form-control' }}
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">г</span>
+                                    </div>
+                                </div>
+                                {% if form.protein.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.protein.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.fat.id_for_label }}">Жиры</label>
+                                <div class="input-group">
+                                    {{ form.fat|add_class:'form-control' }}
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">г</span>
+                                    </div>
+                                </div>
+                                {% if form.fat.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fat.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
             <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                <label for="{{ form.carbs.id_for_label }}">Углеводы</label>
+                                <div class="input-group">
+                                    {{ form.carbs|add_class:'form-control' }}
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">г</span>
+                                    </div>
+                                </div>
+                                {% if form.carbs.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.carbs.errors }}
+                                </div>
                 {% endif %}
-                {% if field.errors %}
-                <div class="alert alert-danger">
-                    {{ field.errors }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="{{ form.notes.id_for_label }}">Заметки</label>
+                        {{ form.notes|add_class:'form-control' }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.notes.errors }}
                 </div>
                 {% endif %}
             </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a href="{% url 'nutrition:list' %}" class="btn btn-secondary">Отмена</a>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Сохранить
+                        </button>
+                        <a href="{% url 'nutrition:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Отмена
+                        </a>
+                    </div>
         </form>
+            </div>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script>
+    $(function () {
+        moment.locale('ru');
+        
+        $('#datepicker').datetimepicker({
+            locale: 'ru',
+            format: 'L'
+        });
+
+        $('#timepicker').datetimepicker({
+            locale: 'ru',
+            format: 'HH:mm',
+            stepping: 5
+        });
+    });
+</script>
 {% endblock %} 

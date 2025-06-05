@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мои цели{% endblock %}
+
+{% block page_title %}
+    Мои цели
+    <a href="{% url 'goals:add' %}" class="btn btn-primary float-right">
+        <i class="fas fa-plus"></i> Добавить цель
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    {% for goal in goals %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ goal.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ goal.get_goal_type_display }}</h6>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ goal.get_progress }}%"
+                             aria-valuenow="{{ goal.get_progress }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ goal.get_progress }}%
+                        </div>
+                    </div>
+                    
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Осталось дней: {{ goal.days_remaining }}
+                        </small>
+                    </p>
+                    
+                    <div class="mt-3">
+                        <span class="badge badge-{{ goal.status }}">
+                            {{ goal.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'goals:detail' goal.id %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i> Подробнее
+                    </a>
+                    <a href="{% url 'goals:edit' goal.id %}" class="btn btn-sm btn-warning">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                У вас пока нет целей. <a href="{% url 'goals:add' %}">Добавить первую цель</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %} 

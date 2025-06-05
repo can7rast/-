@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Прогнозы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Прогнозы и аналитика</h1>
+    
+    {% if error %}
+    <div class="alert alert-warning">
+        {{ error }}
+    </div>
+    {% else %}
+        <!-- График прогноза -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Прогноз изменения веса</h5>
+                {{ weight_plot|safe }}
+            </div>
+        </div>
+
+        <!-- Анализ влияния питания -->
+        {% if nutrition_impact %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Влияние питания на прогресс</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert {% if nutrition_impact.high_calorie_impact > 0 %}alert-success{% else %}alert-warning{% endif %}">
+                            <h6>Дни с высокой калорийностью (>3000 ккал)</h6>
+                            <p>Среднее изменение веса: {{ nutrition_impact.high_calorie_impact|floatformat:2 }} кг/день</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert {% if nutrition_impact.low_calorie_impact < 0 %}alert-success{% else %}alert-warning{% endif %}">
+                            <h6>Дни с низкой калорийностью (<2000 ккал)</h6>
+                            <p>Среднее изменение веса: {{ nutrition_impact.low_calorie_impact|floatformat:2 }} кг/день</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Таблица прогнозов на неделю -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Прогноз на ближайшую неделю</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Прогнозируемый вес</th>
+                                <th>Уверенность</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prediction in predictions %}
+                            <tr>
+                                <td>{{ prediction.date|date:"d.m.Y" }}</td>
+                                <td>{{ prediction.predicted_weight|floatformat:1 }} кг</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ prediction.confidence }}%"
+                                             aria-valuenow="{{ prediction.confidence }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ prediction.confidence|floatformat:0 }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

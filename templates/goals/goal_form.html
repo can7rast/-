@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if goal %}Редактировать цель{% else %}Новая цель{% endif %}
+{% endblock %}
+
+{% block page_title %}
+    {% if goal %}Редактировать цель{% else %}Новая цель{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% render_field field class="form-control" %}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            {% if goal %}Сохранить изменения{% else %}Создать цель{% endif %}
+                        </button>
+                        <a href="{% url 'goals:list' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    $(function () {
+        $('#start_date').datetimepicker({
+            format: 'YYYY-MM-DD',
+            locale: 'ru'
+        });
+        $('#target_date').datetimepicker({
+            format: 'YYYY-MM-DD',
+            locale: 'ru'
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удаление цели{% endblock %}
+
+{% block page_title %}Удаление цели{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Подтверждение удаления</h5>
+                <p class="card-text">
+                    Вы действительно хотите удалить цель "{{ goal.title }}"?
+                </p>
+                <dl class="row">
+                    <dt class="col-sm-4">Тип цели</dt>
+                    <dd class="col-sm-8">{{ goal.get_goal_type_display }}</dd>
+                    
+                    <dt class="col-sm-4">Прогресс</dt>
+                    <dd class="col-sm-8">{{ goal.get_progress }}%</dd>
+                    
+                    <dt class="col-sm-4">Статус</dt>
+                    <dd class="col-sm-8">{{ goal.get_status_display }}</dd>
+                </dl>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                    <a href="{% url 'goals:detail' goal.id %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

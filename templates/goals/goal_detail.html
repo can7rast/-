@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ goal.title }}{% endblock %}
+
+{% block page_title %}
+    {{ goal.title }}
+    <div class="float-right">
+        <a href="{% url 'goals:edit' goal.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Редактировать
+        </a>
+        <a href="{% url 'goals:delete' goal.id %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Удалить
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Информация о цели</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Тип цели</dt>
+                    <dd class="col-sm-9">{{ goal.get_goal_type_display }}</dd>
+                    
+                    <dt class="col-sm-3">Описание</dt>
+                    <dd class="col-sm-9">{{ goal.description|linebreaks }}</dd>
+                    
+                    <dt class="col-sm-3">Целевое значение</dt>
+                    <dd class="col-sm-9">{{ goal.target_value }}</dd>
+                    
+                    <dt class="col-sm-3">Текущее значение</dt>
+                    <dd class="col-sm-9">{{ goal.current_value }}</dd>
+                    
+                    <dt class="col-sm-3">Дата начала</dt>
+                    <dd class="col-sm-9">{{ goal.start_date }}</dd>
+                    
+                    <dt class="col-sm-3">Целевая дата</dt>
+                    <dd class="col-sm-9">{{ goal.target_date }}</dd>
+                    
+                    <dt class="col-sm-3">Осталось дней</dt>
+                    <dd class="col-sm-9">{{ goal.days_remaining }}</dd>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Прогресс</h5>
+                <div class="progress mb-3">
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: {{ goal.get_progress }}%"
+                         aria-valuenow="{{ goal.get_progress }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ goal.get_progress }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Статус</h5>
+                <form method="post" action="{% url 'goals:update_status' goal.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <select name="status" class="form-control" onchange="this.form.submit()">
+                            {% for value, label in goal.STATUS_CHOICES %}
+                                <option value="{{ value }}" {% if goal.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

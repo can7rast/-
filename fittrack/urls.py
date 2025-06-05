@@ -1,13 +1,15 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('users.urls', namespace='users')),
+    path('', include('users.urls')),
     path('workouts/', include('workouts.urls')),
     path('nutrition/', include('nutrition.urls')),
-    path('progress/', include('progress.urls')),
-    path('goals/', include('goals.urls')),
-    path('predictions/', include('predictions.urls')),
     path('sleep/', include('sleep.urls')),
-] 
+    path('progress/', include('progress.urls')),
+    path('predictions/', include('predictions.urls')),
+    path('goals/', include('goals.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

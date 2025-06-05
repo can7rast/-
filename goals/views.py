@@ -1,60 +1,82 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Goal
-from django.http import HttpResponse
+from .forms import GoalForm
 
-class GoalListView(LoginRequiredMixin, ListView):
-    model = Goal
-    template_name = 'goals/list.html'
-    context_object_name = 'goals'
+@login_required
+def goal_list(request):
+    """Отображает список целей пользователя"""
+    goals = Goal.objects.filter(user=request.user)
+    context = {'goals': goals}
+    return render(request, 'goals/goal_list.html', context)
 
-    def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user)
+@login_required
+def add_goal(request):
+    """Добавляет новую цель"""
+    if request.method != 'POST':
+        form = GoalForm()
+    else:
+        form = GoalForm(data=request.POST)
+        if form.is_valid():
+            new_goal = form.save(commit=False)
+            new_goal.user = request.user
+            new_goal.save()
+            messages.success(request, 'Цель успешно добавлена!')
+            return redirect('goals:list')
+    
+    context = {'form': form}
+    return render(request, 'goals/goal_form.html', context)
 
-class GoalDetailView(LoginRequiredMixin, DetailView):
-    model = Goal
-    template_name = 'goals/detail.html'
-    context_object_name = 'goal'
+@login_required
+def goal_detail(request, goal_id):
+    """Отображает детали цели"""
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+    context = {'goal': goal}
+    return render(request, 'goals/goal_detail.html', context)
 
-class GoalCreateView(LoginRequiredMixin, CreateView):
-    model = Goal
-    template_name = 'goals/form.html'
-    fields = ['goal_type', 'current_value', 'target_value', 'start_date', 'end_date', 'status', 'description', 'notes']
-    success_url = reverse_lazy('goals:list')
+@login_required
+def edit_goal(request, goal_id):
+    """Редактирует существующую цель"""
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+    
+    if request.method != 'POST':
+        form = GoalForm(instance=goal)
+    else:
+        form = GoalForm(instance=goal, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Цель успешно обновлена!')
+            return redirect('goals:detail', goal_id=goal.id)
+    
+    context = {'goal': goal, 'form': form}
+    return render(request, 'goals/goal_form.html', context)
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+@login_required
+def delete_goal(request, goal_id):
+    """Удаляет цель"""
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+    
+    if request.method == 'POST':
+        goal.delete()
+        messages.success(request, 'Цель успешно удалена!')
+        return redirect('goals:list')
+    
+    context = {'goal': goal}
+    return render(request, 'goals/goal_confirm_delete.html', context)
 
-class GoalUpdateView(LoginRequiredMixin, UpdateView):
-    model = Goal
-    template_name = 'goals/form.html'
-    fields = ['goal_type', 'current_value', 'target_value', 'start_date', 'end_date', 'status', 'description', 'notes']
-    success_url = reverse_lazy('goals:list')
-
-    def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user)
-
-class GoalDeleteView(LoginRequiredMixin, DeleteView):
-    model = Goal
-    template_name = 'goals/confirm_delete.html'
-    success_url = reverse_lazy('goals:list')
-
-    def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user)
-
-def list(request):
-    return HttpResponse('Заглушка для списка целей')
-
-def add(request):
-    return HttpResponse('Заглушка для добавления цели')
-
-def detail(request, pk):
-    return HttpResponse(f'Заглушка для просмотра цели {pk}')
-
-def edit(request, pk):
-    return HttpResponse(f'Заглушка для редактирования цели {pk}')
-
-def delete(request, pk):
-    return HttpResponse(f'Заглушка для удаления цели {pk}') 
+@login_required
+def update_goal_status(request, goal_id):
+    """Обновляет статус цели"""
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Goal.STATUS_CHOICES):
+            goal.status = new_status
+            goal.save()
+            messages.success(request, 'Статус цели успешно обновлен!')
+        else:
+            messages.error(request, 'Некорректный статус!')
+    
+    return redirect('goals:detail', goal_id=goal.id) 

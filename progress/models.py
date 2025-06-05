@@ -17,4 +17,20 @@ class Progress(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.user.username} - {self.date}" 
+        return f"{self.user.username} - {self.date}"
+
+class PersonalRecord(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь')
+    date = models.DateField(verbose_name='Дата')
+    exercise = models.CharField(max_length=100, verbose_name='Упражнение')
+    weight = models.FloatField(verbose_name='Вес (кг)')
+    reps = models.IntegerField(verbose_name='Количество повторений')
+    notes = models.TextField(blank=True, verbose_name='Заметки')
+
+    class Meta:
+        verbose_name = 'Личный рекорд'
+        verbose_name_plural = 'Личные рекорды'
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.exercise} ({self.date})" 

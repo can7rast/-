@@ -1,32 +1,121 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+{{ form.media.css }}
+{% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                {% if field.errors %}
-                <div class="alert alert-danger">
-                    {{ field.errors }}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ title }}</h3>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="messages mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group mb-3">
+                        <label for="{{ form.workout_type.id_for_label }}">Тип тренировки</label>
+                        {{ form.workout_type|add_class:'form-control' }}
+                        {% if form.workout_type.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.workout_type.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="{{ form.date.id_for_label }}">Дата</label>
+                        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                            {{ form.date }}
+                            <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                            </div>
+                        </div>
+                        {% if form.date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.date.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="{{ form.duration.id_for_label }}">Продолжительность (в минутах)</label>
+                        <div class="input-group">
+                            {{ form.duration|add_class:'form-control' }}
+                            <div class="input-group-append">
+                                <span class="input-group-text">мин</span>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Введите продолжительность тренировки в минутах (от 1 до 1440)</small>
+                        {% if form.duration.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.duration.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="{{ form.intensity.id_for_label }}">Интенсивность</label>
+                        {{ form.intensity|add_class:'form-control' }}
+                        {% if form.intensity.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.intensity.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="{{ form.notes.id_for_label }}">Заметки</label>
+                        {{ form.notes|add_class:'form-control' }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.notes.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Сохранить
+                        </button>
+                        <a href="{% url 'workouts:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Отмена
+                        </a>
+                    </div>
+                </form>
             </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a href="{% url 'workouts:list' %}" class="btn btn-secondary">Отмена</a>
-        </form>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script>
+    $(function () {
+        moment.locale('ru');
+        $('#datetimepicker1').datetimepicker({
+            locale: 'ru',
+            format: 'L'
+        });
+    });
+</script>
 {% endblock %} 

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block page_title %}
+    Редактирование профиля
+    <a href="{% url 'users:profile' %}" class="btn btn-secondary float-right">
+        <i class="fas fa-arrow-left"></i> Вернуться к профилю
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+                    
+                    <h5 class="card-title mb-4">Основная информация</h5>
+                    {% for field in user_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% render_field field class="form-control" %}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    
+                    <h5 class="card-title mb-4 mt-5">Дополнительная информация</h5>
+                    {% for field in profile_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% if field.name == 'avatar' %}
+                                <div class="custom-file">
+                                    {% render_field field class="custom-file-input" %}
+                                    <label class="custom-file-label" for="{{ field.id_for_label }}">
+                                        Выберите файл
+                                    </label>
+                                </div>
+                            {% else %}
+                                {% render_field field class="form-control" %}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Обновление названия файла при выборе
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').html(fileName);
+    });
+</script>
+{% endblock %}
+{% endblock %} 

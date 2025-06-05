@@ -1,48 +1,112 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Тренировка от {{ workout.date }}{% endblock %}
+{% block title %}Тренировка от {{ workout.date|date:"d.m.Y" }}{% endblock %}
 
-{% block page_title %}Тренировка от {{ workout.date }}{% endblock %}
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center">
+    <span>Просмотр тренировки</span>
+    <div class="btn-group">
+        <a href="{% url 'workouts:edit' workout.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Редактировать
+        </a>
+        <a href="{% url 'workouts:delete' workout.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Удалить
+        </a>
+        <a href="{% url 'workouts:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> К списку
+        </a>
+    </div>
+</div>
+{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h5>Информация о тренировке</h5>
-                <table class="table">
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Основная информация
+                </h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
                     <tr>
-                        <th>Тип тренировки:</th>
+                        <th style="width: 40%"><i class="fas fa-running"></i> Тип:</th>
                         <td>{{ workout.workout_type }}</td>
                     </tr>
                     <tr>
-                        <th>Дата:</th>
-                        <td>{{ workout.date }}</td>
+                        <th><i class="far fa-calendar-alt"></i> Дата:</th>
+                        <td>{{ workout.date|date:"d.m.Y" }}</td>
                     </tr>
                     <tr>
-                        <th>Длительность:</th>
-                        <td>{{ workout.duration }} минут</td>
+                        <th><i class="far fa-clock"></i> Длительность:</th>
+                        <td>{{ workout.duration_formatted }}</td>
                     </tr>
                     <tr>
-                        <th>Интенсивность:</th>
-                        <td>{{ workout.intensity }}</td>
+                        <th><i class="fas fa-fire"></i> Интенсивность:</th>
+                        <td>
+                            {% if workout.intensity == 'low' %}
+                                <span class="badge bg-success">{{ workout.get_intensity_display }}</span>
+                            {% elif workout.intensity == 'medium' %}
+                                <span class="badge bg-warning">{{ workout.get_intensity_display }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ workout.get_intensity_display }}</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     <tr>
-                        <th>Сожжено калорий:</th>
-                        <td>{{ workout.calories_burned }}</td>
+                        <th><i class="fas fa-fire-alt"></i> Сожжено калорий:</th>
+                        <td>{{ workout.calories_burned }} ккал</td>
                     </tr>
                 </table>
             </div>
-            <div class="col-md-6">
-                <h5>Заметки</h5>
-                <p>{{ workout.notes|default:"Нет заметок" }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie"></i> Статистика
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="display-4 text-primary mb-3">
+                    {{ workout.calories_burned }}
+                </div>
+                <p class="text-muted mb-0">калорий сожжено</p>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="h4 mb-0">{{ workout.duration_minutes }}</div>
+                        <small class="text-muted">минут</small>
+                    </div>
+                    <div class="col-6">
+                        <div class="h4 mb-0">
+                            {% if workout.intensity == 'low' %}🟢
+                            {% elif workout.intensity == 'medium' %}🟡
+                            {% else %}🔴
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">интенсивность</small>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="mt-3">
-            <a href="{% url 'workouts:update' workout.pk %}" class="btn btn-primary">Редактировать</a>
-            <a href="{% url 'workouts:delete' workout.pk %}" class="btn btn-danger">Удалить</a>
-            <a href="{% url 'workouts:list' %}" class="btn btn-secondary">Назад к списку</a>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-sticky-note"></i> Заметки
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if workout.notes %}
+                    {{ workout.notes|linebreaks }}
+                {% else %}
+                    <p class="text-muted mb-0">Нет заметок</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

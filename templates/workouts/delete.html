@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удаление тренировки{% endblock %}
+
+{% block page_title %}Удаление тренировки{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Вы действительно хотите удалить эту тренировку?</h5>
+                
+                <div class="alert alert-warning">
+                    <h6>Детали тренировки:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Тип:</strong> {{ workout.workout_type }}</li>
+                        <li><strong>Дата:</strong> {{ workout.date|date:"d.m.Y" }}</li>
+                        <li><strong>Продолжительность:</strong> {{ workout.duration|time:"H:i" }}</li>
+                        <li><strong>Интенсивность:</strong> {{ workout.intensity }}</li>
+                        {% if workout.notes %}
+                        <li><strong>Заметки:</strong> {{ workout.notes }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Удалить
+                        </button>
+                        <a href="{% url 'workouts:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Отмена
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

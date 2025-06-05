@@ -1,60 +1,77 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from datetime import datetime, timedelta
 from .models import Sleep
-from django.http import HttpResponse
+from .forms import SleepForm
 
-class SleepListView(LoginRequiredMixin, ListView):
-    model = Sleep
-    template_name = 'sleep/list.html'
-    context_object_name = 'sleeps'
+@login_required
+def sleep_list(request):
+    sleeps = Sleep.objects.filter(user=request.user).order_by('-date')
+    return render(request, 'sleep/list.html', {'sleeps': sleeps})
 
-    def get_queryset(self):
-        return Sleep.objects.filter(user=self.request.user)
+@login_required
+def sleep_create(request):
+    if request.method == 'POST':
+        form = SleepForm(request.POST)
+        if form.is_valid():
+            sleep = form.save(commit=False)
+            sleep.user = request.user
+            
+            # Расчет длительности сна
+            start_time = datetime.combine(sleep.date, sleep.start_time)
+            end_time = datetime.combine(sleep.date, sleep.end_time)
+            
+            # Если время окончания меньше времени начала, значит сон перешел на следующий день
+            if end_time < start_time:
+                end_time += timedelta(days=1)
+            
+            duration = (end_time - start_time).total_seconds() / 3600  # конвертируем в часы
+            sleep.duration = round(duration, 2)
+            
+            sleep.save()
+            messages.success(request, 'Запись о сне успешно добавлена!')
+            return redirect('sleep:list')
+    else:
+        form = SleepForm()
+    return render(request, 'sleep/form.html', {'form': form, 'title': 'Добавить запись о сне'})
 
-class SleepDetailView(LoginRequiredMixin, DetailView):
-    model = Sleep
-    template_name = 'sleep/detail.html'
-    context_object_name = 'sleep'
+@login_required
+def sleep_detail(request, pk):
+    sleep = get_object_or_404(Sleep, pk=pk, user=request.user)
+    return render(request, 'sleep/detail.html', {'sleep': sleep})
 
-class SleepCreateView(LoginRequiredMixin, CreateView):
-    model = Sleep
-    template_name = 'sleep/form.html'
-    fields = ['date', 'start_time', 'end_time', 'duration', 'quality', 'interruptions', 'notes']
-    success_url = reverse_lazy('sleep:list')
+@login_required
+def sleep_update(request, pk):
+    sleep = get_object_or_404(Sleep, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = SleepForm(request.POST, instance=sleep)
+        if form.is_valid():
+            sleep = form.save(commit=False)
+            
+            # Расчет длительности сна
+            start_time = datetime.combine(sleep.date, sleep.start_time)
+            end_time = datetime.combine(sleep.date, sleep.end_time)
+            
+            # Если время окончания меньше времени начала, значит сон перешел на следующий день
+            if end_time < start_time:
+                end_time += timedelta(days=1)
+            
+            duration = (end_time - start_time).total_seconds() / 3600  # конвертируем в часы
+            sleep.duration = round(duration, 2)
+            
+            sleep.save()
+            messages.success(request, 'Запись о сне успешно обновлена!')
+            return redirect('sleep:list')
+    else:
+        form = SleepForm(instance=sleep)
+    return render(request, 'sleep/form.html', {'form': form, 'title': 'Редактировать запись о сне'})
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
-
-class SleepUpdateView(LoginRequiredMixin, UpdateView):
-    model = Sleep
-    template_name = 'sleep/form.html'
-    fields = ['date', 'start_time', 'end_time', 'duration', 'quality', 'interruptions', 'notes']
-    success_url = reverse_lazy('sleep:list')
-
-    def get_queryset(self):
-        return Sleep.objects.filter(user=self.request.user)
-
-class SleepDeleteView(LoginRequiredMixin, DeleteView):
-    model = Sleep
-    template_name = 'sleep/confirm_delete.html'
-    success_url = reverse_lazy('sleep:list')
-
-    def get_queryset(self):
-        return Sleep.objects.filter(user=self.request.user)
-
-def list(request):
-    return HttpResponse('Заглушка для списка сна')
-
-def add(request):
-    return HttpResponse('Заглушка для добавления сна')
-
-def detail(request, pk):
-    return HttpResponse(f'Заглушка для просмотра сна {pk}')
-
-def edit(request, pk):
-    return HttpResponse(f'Заглушка для редактирования сна {pk}')
-
-def delete(request, pk):
-    return HttpResponse(f'Заглушка для удаления сна {pk}') 
+@login_required
+def sleep_delete(request, pk):
+    sleep = get_object_or_404(Sleep, pk=pk, user=request.user)
+    if request.method == 'POST':
+        sleep.delete()
+        messages.success(request, 'Запись о сне успешно удалена!')
+        return redirect('sleep:list')
+    return render(request, 'sleep/delete.html', {'sleep': sleep}) 

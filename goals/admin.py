@@ -3,6 +3,7 @@ from .models import Goal
 
 @admin.register(Goal)
 class GoalAdmin(admin.ModelAdmin):
-    list_display = ('user', 'goal_type', 'current_value', 'target_value', 'status', 'start_date', 'end_date')
-    list_filter = ('user', 'goal_type', 'status')
-    search_fields = ('user__username', 'goal_type', 'description', 'notes') 
+    list_display = ('title', 'user', 'goal_type', 'status', 'start_date', 'target_date')
+    list_filter = ('goal_type', 'status', 'start_date', 'target_date')
+    search_fields = ('title', 'description', 'user__username')
+    date_hierarchy = 'start_date' 

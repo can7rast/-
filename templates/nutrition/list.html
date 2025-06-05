@@ -1,62 +1,271 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load nutrition_extras %}
 
 {% block title %}Питание - FitTrack{% endblock %}
 
-{% block page_title %}Питание{% endblock %}
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center">
+    <span>Питание</span>
+    <a href="{% url 'nutrition:add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Добавить прием пищи
+    </a>
+</div>
+{% endblock %}
 
 {% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-day"></i> Питание за {{ today|date:"d.m.Y" }}
+                </h5>
+            </div>
+            <div class="card-body">
 <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 {% if today_by_type.breakfast %}border-success{% else %}border-light{% endif %}">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="fas fa-sun"></i> Завтрак
+                                </h6>
+                                {% if today_by_type.breakfast %}
+                                    <p class="mb-1">{{ today_by_type.breakfast.calories }} ккал</p>
+                                    <small class="text-muted">
+                                        Б: {{ today_by_type.breakfast.protein }}г |
+                                        Ж: {{ today_by_type.breakfast.fat }}г |
+                                        У: {{ today_by_type.breakfast.carbs }}г
+                                    </small>
+                                {% else %}
+                                    <p class="text-muted mb-0">Не записан</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 {% if today_by_type.lunch %}border-primary{% else %}border-light{% endif %}">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="fas fa-cloud-sun"></i> Обед
+                                </h6>
+                                {% if today_by_type.lunch %}
+                                    <p class="mb-1">{{ today_by_type.lunch.calories }} ккал</p>
+                                    <small class="text-muted">
+                                        Б: {{ today_by_type.lunch.protein }}г |
+                                        Ж: {{ today_by_type.lunch.fat }}г |
+                                        У: {{ today_by_type.lunch.carbs }}г
+                                    </small>
+                                {% else %}
+                                    <p class="text-muted mb-0">Не записан</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 {% if today_by_type.snack %}border-warning{% else %}border-light{% endif %}">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="fas fa-cookie"></i> Перекус
+                                </h6>
+                                {% if today_by_type.snack %}
+                                    <p class="mb-1">{{ today_by_type.snack.calories }} ккал</p>
+                                    <small class="text-muted">
+                                        Б: {{ today_by_type.snack.protein }}г |
+                                        Ж: {{ today_by_type.snack.fat }}г |
+                                        У: {{ today_by_type.snack.carbs }}г
+                                    </small>
+                                {% else %}
+                                    <p class="text-muted mb-0">Не записан</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 {% if today_by_type.dinner %}border-info{% else %}border-light{% endif %}">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="fas fa-moon"></i> Ужин
+                                </h6>
+                                {% if today_by_type.dinner %}
+                                    <p class="mb-1">{{ today_by_type.dinner.calories }} ккал</p>
+                                    <small class="text-muted">
+                                        Б: {{ today_by_type.dinner.protein }}г |
+                                        Ж: {{ today_by_type.dinner.fat }}г |
+                                        У: {{ today_by_type.dinner.carbs }}г
+                                    </small>
+                                {% else %}
+                                    <p class="text-muted mb-0">Не записан</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie"></i> Итого за день
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2 class="display-4 text-primary mb-0">{{ total_calories }}</h2>
+                    <small class="text-muted">калорий</small>
+                </div>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h4 class="text-success mb-0">{{ total_protein }}г</h4>
+                        <small class="text-muted">белки</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-warning mb-0">{{ total_fat }}г</h4>
+                        <small class="text-muted">жиры</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-info mb-0">{{ total_carbs }}г</h4>
+                        <small class="text-muted">углеводы</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Секция недельной статистики -->
+<div class="row mb-4">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Приемы пищи</h3>
-                <div class="card-tools">
-                    <a href="{% url 'nutrition:create' %}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Добавить прием пищи
-                    </a>
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line"></i> Статистика за неделю
+                    <small class="text-muted">
+                        ({{ weekly_stats.week_start|date:"d.m.Y" }} - {{ weekly_stats.week_end|date:"d.m.Y" }})
+                    </small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Общая статистика -->
+                    <div class="col-md-4">
+                        <div class="card border-0">
+                            <div class="card-body text-center">
+                                <h3 class="display-4 text-primary mb-0">{{ weekly_stats.avg_daily_calories }}</h3>
+                                <small class="text-muted">калорий в день в среднем</small>
+                                <hr>
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <h5 class="text-success mb-0">{{ weekly_stats.total_protein }}г</h5>
+                                        <small class="text-muted">белки</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h5 class="text-warning mb-0">{{ weekly_stats.total_fat }}г</h5>
+                                        <small class="text-muted">жиры</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h5 class="text-info mb-0">{{ weekly_stats.total_carbs }}г</h5>
+                                        <small class="text-muted">углеводы</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Статистика по приемам пищи -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-success">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <i class="fas fa-sun"></i> Завтраки
+                                        </h6>
+                                        <p class="mb-1">Количество: {{ weekly_stats.breakfast_count }}</p>
+                                        <p class="mb-0">В среднем: {{ weekly_stats.avg_breakfast_calories }} ккал</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-primary">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <i class="fas fa-cloud-sun"></i> Обеды
+                                        </h6>
+                                        <p class="mb-1">Количество: {{ weekly_stats.lunch_count }}</p>
+                                        <p class="mb-0">В среднем: {{ weekly_stats.avg_lunch_calories }} ккал</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-warning">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <i class="fas fa-cookie"></i> Перекусы
+                                        </h6>
+                                        <p class="mb-1">Количество: {{ weekly_stats.snack_count }}</p>
+                                        <p class="mb-0">В среднем: {{ weekly_stats.avg_snack_calories }} ккал</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-info">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <i class="fas fa-moon"></i> Ужины
+                                        </h6>
+                                        <p class="mb-1">Количество: {{ weekly_stats.dinner_count }}</p>
+                                        <p class="mb-0">В среднем: {{ weekly_stats.avg_dinner_calories }} ккал</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- История статистики -->
+{% if past_weeks_stats %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history"></i> История по неделям
+                </h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Дата</th>
-                                <th>Тип</th>
-                                <th>Время</th>
-                                <th>Калории</th>
-                                <th>Белки</th>
-                                <th>Жиры</th>
-                                <th>Углеводы</th>
-                                <th>Действия</th>
+                                <th>Неделя</th>
+                                <th>Калорий в день</th>
+                                <th>Всего белков</th>
+                                <th>Всего жиров</th>
+                                <th>Всего углеводов</th>
+                                <th>Приемов пищи</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for meal in meals %}
+                            {% for stats in past_weeks_stats %}
                             <tr>
-                                <td>{{ meal.date|date:"d.m.Y" }}</td>
-                                <td>{{ meal.get_meal_type_display }}</td>
-                                <td>{{ meal.time|time:"H:i" }}</td>
-                                <td>{{ meal.calories }}</td>
-                                <td>{{ meal.protein }} г</td>
-                                <td>{{ meal.fat }} г</td>
-                                <td>{{ meal.carbs }} г</td>
+                                <td>{{ stats.week_start|date:"d.m.Y" }} - {{ stats.week_end|date:"d.m.Y" }}</td>
+                                <td>{{ stats.avg_daily_calories }} ккал</td>
+                                <td>{{ stats.total_protein }}г</td>
+                                <td>{{ stats.total_fat }}г</td>
+                                <td>{{ stats.total_carbs }}г</td>
                                 <td>
-                                    <a href="{% url 'nutrition:detail' meal.id %}" class="btn btn-info btn-sm">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'nutrition:update' meal.id %}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'nutrition:delete' meal.id %}" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    <span class="badge bg-success">З: {{ stats.breakfast_count }}</span>
+                                    <span class="badge bg-primary">О: {{ stats.lunch_count }}</span>
+                                    <span class="badge bg-warning">П: {{ stats.snack_count }}</span>
+                                    <span class="badge bg-info">У: {{ stats.dinner_count }}</span>
                                 </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center">Нет записей о питании</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -66,4 +275,258 @@
         </div>
     </div>
 </div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-history"></i> История приемов пищи
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                        <th>Время</th>
+                                <th>Тип</th>
+                                <th>Калории</th>
+                                <th>Белки</th>
+                                <th>Жиры</th>
+                                <th>Углеводы</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for meal in meals %}
+                    <tr {% if meal.date == today %}class="table-light"{% endif %}>
+                                <td>{{ meal.date|date:"d.m.Y" }}</td>
+                                <td>{{ meal.time|time:"H:i" }}</td>
+                        <td>
+                            {% if meal.meal_type == 'breakfast' %}
+                                <span class="badge bg-success">{{ meal.get_meal_type_display }}</span>
+                            {% elif meal.meal_type == 'lunch' %}
+                                <span class="badge bg-primary">{{ meal.get_meal_type_display }}</span>
+                            {% elif meal.meal_type == 'snack' %}
+                                <span class="badge bg-warning">{{ meal.get_meal_type_display }}</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ meal.get_meal_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ meal.calories }} ккал</td>
+                                <td>{{ meal.protein }} г</td>
+                                <td>{{ meal.fat }} г</td>
+                                <td>{{ meal.carbs }} г</td>
+                                <td>
+                            <div class="btn-group">
+                                <a href="{% url 'nutrition:detail' meal.id %}" class="btn btn-info btn-sm" title="Просмотр">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                <a href="{% url 'nutrition:edit' meal.id %}" class="btn btn-primary btn-sm" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                <a href="{% url 'nutrition:delete' meal.id %}" class="btn btn-danger btn-sm" title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                            </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-utensils fa-2x mb-3"></i>
+                                <p class="mb-0">У вас пока нет записей о питании</p>
+                                <a href="{% url 'nutrition:add' %}" class="btn btn-primary btn-sm mt-2">
+                                    <i class="fas fa-plus"></i> Добавить первую запись
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Секция месячной статистики -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-alt"></i> Статистика за месяц
+                    <small class="text-muted">
+                        ({{ monthly_stats.month|date:"F Y" }})
+                    </small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Общая статистика -->
+                    <div class="col-md-4">
+                        <div class="card border-0">
+                            <div class="card-body text-center">
+                                <h3 class="display-4 text-primary mb-0">{{ monthly_stats.avg_daily_calories }}</h3>
+                                <small class="text-muted">калорий в день в среднем</small>
+                                <hr>
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <h5 class="text-success mb-0">{{ monthly_stats.total_protein }}г</h5>
+                                        <small class="text-muted">белки</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h5 class="text-warning mb-0">{{ monthly_stats.total_fat }}г</h5>
+                                        <small class="text-muted">жиры</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h5 class="text-info mb-0">{{ monthly_stats.total_carbs }}г</h5>
+                                        <small class="text-muted">углеводы</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Статистика по дням -->
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">
+                                    <i class="fas fa-calendar-check"></i> Отслеживание
+                                </h6>
+                                <div class="mb-3">
+                                    <p class="mb-1">Дней с записями: {{ monthly_stats.days_tracked }}</p>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: {{ monthly_stats.days_tracked|default:0|multiply:100|divide:31 }}%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="mb-1">Максимум калорий за день:</p>
+                                    <h5 class="mb-0">{{ monthly_stats.max_daily_calories }} ккал</h5>
+                                    <small class="text-muted">
+                                        {{ monthly_stats.highest_calorie_day|date:"d.m.Y" }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <p class="mb-1">Самый частый прием пищи:</p>
+                                    {% with meal_type=monthly_stats.most_common_meal_type %}
+                                    {% if meal_type == 'breakfast' %}
+                                        <span class="badge bg-success">Завтрак</span>
+                                    {% elif meal_type == 'lunch' %}
+                                        <span class="badge bg-primary">Обед</span>
+                                    {% elif meal_type == 'snack' %}
+                                        <span class="badge bg-warning">Перекус</span>
+                                    {% elif meal_type == 'dinner' %}
+                                        <span class="badge bg-info">Ужин</span>
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Статистика по приемам пищи -->
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">
+                                    <i class="fas fa-utensils"></i> Приемы пищи
+                                </h6>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span><i class="fas fa-sun text-success"></i> Завтраки</span>
+                                        <span class="badge bg-success">{{ monthly_stats.breakfast_count }}</span>
+                                    </div>
+                                    <small class="text-muted">В среднем: {{ monthly_stats.avg_breakfast_calories }} ккал</small>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span><i class="fas fa-cloud-sun text-primary"></i> Обеды</span>
+                                        <span class="badge bg-primary">{{ monthly_stats.lunch_count }}</span>
+                                    </div>
+                                    <small class="text-muted">В среднем: {{ monthly_stats.avg_lunch_calories }} ккал</small>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span><i class="fas fa-cookie text-warning"></i> Перекусы</span>
+                                        <span class="badge bg-warning">{{ monthly_stats.snack_count }}</span>
+                                    </div>
+                                    <small class="text-muted">В среднем: {{ monthly_stats.avg_snack_calories }} ккал</small>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span><i class="fas fa-moon text-info"></i> Ужины</span>
+                                        <span class="badge bg-info">{{ monthly_stats.dinner_count }}</span>
+                                    </div>
+                                    <small class="text-muted">В среднем: {{ monthly_stats.avg_dinner_calories }} ккал</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- История месячной статистики -->
+{% if past_months_stats %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history"></i> История по месяцам
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Месяц</th>
+                                <th>Дней отслежено</th>
+                                <th>Калорий в день</th>
+                                <th>Всего белков</th>
+                                <th>Всего жиров</th>
+                                <th>Всего углеводов</th>
+                                <th>Максимум за день</th>
+                                <th>Приемов пищи</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stats in past_months_stats %}
+                            <tr>
+                                <td>{{ stats.month|date:"F Y" }}</td>
+                                <td>{{ stats.days_tracked }} из {{ stats.month|date:"t" }}</td>
+                                <td>{{ stats.avg_daily_calories }} ккал</td>
+                                <td>{{ stats.total_protein }}г</td>
+                                <td>{{ stats.total_fat }}г</td>
+                                <td>{{ stats.total_carbs }}г</td>
+                                <td>
+                                    {{ stats.max_daily_calories }} ккал
+                                    <br>
+                                    <small class="text-muted">{{ stats.highest_calorie_day|date:"d.m.Y" }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">З: {{ stats.breakfast_count }}</span>
+                                    <span class="badge bg-primary">О: {{ stats.lunch_count }}</span>
+                                    <span class="badge bg-warning">П: {{ stats.snack_count }}</span>
+                                    <span class="badge bg-info">У: {{ stats.dinner_count }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %} 

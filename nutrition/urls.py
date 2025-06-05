@@ -4,11 +4,9 @@ from . import views
 app_name = 'nutrition'
 
 urlpatterns = [
-    path('', views.MealListView.as_view(), name='list'),
-    path('add/', views.MealCreateView.as_view(), name='add'),
-    path('add/', views.MealCreateView.as_view(), name='create'),
-    path('<int:pk>/', views.MealDetailView.as_view(), name='detail'),
-    path('<int:pk>/edit/', views.MealUpdateView.as_view(), name='edit'),
-    path('<int:pk>/edit/', views.MealUpdateView.as_view(), name='update'),
-    path('<int:pk>/delete/', views.MealDeleteView.as_view(), name='delete'),
+    path('', views.meal_list, name='list'),
+    path('add/', views.meal_add, name='add'),
+    path('<int:pk>/', views.meal_detail, name='detail'),
+    path('<int:pk>/edit/', views.meal_edit, name='edit'),
+    path('<int:pk>/delete/', views.meal_delete, name='delete'),
 ] 
