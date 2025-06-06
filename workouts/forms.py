@@ -79,6 +79,28 @@ class WorkoutForm(forms.ModelForm):
     def save(self, commit=True):
         workout = super().save(commit=False)
         workout.duration = self.cleaned_data['duration']
+        # Рассчитываем сожженные калории
+        base_calories = {
+            'cardio': 8,  # калорий в минуту при средней интенсивности
+            'strength': 6,
+            'hiit': 10,
+            'yoga': 4,
+            'stretching': 3,
+            'other': 5
+        }
+        
+        intensity_multiplier = {
+            'low': 0.8,
+            'medium': 1.0,
+            'high': 1.2
+        }
+        
+        workout.calories_burned = int(
+            workout.duration * 
+            base_calories[workout.workout_type] * 
+            intensity_multiplier[workout.intensity]
+        )
+        
         if commit:
             workout.save()
         return workout 
