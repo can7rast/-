@@ -7,4 +7,6 @@ Pillow
 python-dotenv==1.1.0
 django-widget-tweaks
 django-tempus-dominus==5.1.2.17
-numpy>=1.22.3 
+numpy>=1.22.3
+gunicorn==21.2.0
+psycopg2-binary==2.9.9 
